@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Popiezz — Words, mostly true</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="pz-nav container">
+  <div class="pz-logo">POPIEZZ</div>
+  <div class="pz-nav-right">
+    <div class="pz-navlinks">
+      <a class="pz-navlink pz-navlink-active" href="index.html">Home</a>
+      <a class="pz-navlink" href="blog.html">Blog</a>
+      <a class="pz-navlink" href="about.html">About</a>
+    </div>
+    <div class="pz-toggle-track">
+      <button class="pz-toggle-opt" data-theme="light">Light</button>
+      <button class="pz-toggle-opt" data-theme="dark">Dark</button>
+    </div>
+  </div>
+</nav>
+
+<div class="pz-hero container">
+  <div class="pz-eyebrow">Words, mostly true</div>
+  <h1 class="pz-h1">Notes on work, attention, and the slow way of doing things.</h1>
+</div>
+
+<div class="pz-journal container">
+  <div class="pz-section-header">
+    <span class="pz-section-label">Journal</span>
+    <span class="pz-count" id="pz-count"></span>
+  </div>
+  <div id="pz-journal-mount"></div>
+</div>
+
+<div class="pz-footer container">
+  <span class="pz-count">© 2026 Popiezz</span>
+  <span class="pz-count">built by hand, published from markdown</span>
+</div>
+
+<script src="articles.js"></script>
+<script src="theme.js"></script>
+<script>
+  pzRenderJournal('pz-journal-mount', pzArticles);
+  document.getElementById('pz-count').textContent = pzArticles.length + ' entries';
+</script>
+</body>
+</html>
