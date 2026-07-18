@@ -1,7 +1,0 @@
----
-title: third test
-date: 2026-07-15
-tags: [cars]
----
-
-## Another one
