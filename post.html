@@ -79,8 +79,22 @@
       var tick = document.createElement('button');
       tick.type = 'button';
       tick.className = 'pz-progress-tick';
-      tick.setAttribute('aria-label', 'Jump to paragraph ' + (i + 1));
-      tick.innerHTML = '<span class="pz-progress-tick-bar"></span>';
+
+      var bar = document.createElement('span');
+      bar.className = 'pz-progress-tick-bar';
+      tick.appendChild(bar);
+
+      var prev = p.previousElementSibling;
+      var sectionTitle = prev && /^H[1-6]$/.test(prev.tagName) ? prev.textContent : null;
+      if (sectionTitle) {
+        tick.classList.add('is-section');
+        var label = document.createElement('span');
+        label.className = 'pz-progress-section-label';
+        label.textContent = sectionTitle;
+        tick.appendChild(label);
+      }
+      tick.setAttribute('aria-label', sectionTitle ? 'Jump to "' + sectionTitle + '"' : 'Jump to paragraph ' + (i + 1));
+
       tick.addEventListener('click', function () {
         p.scrollIntoView({ behavior: 'smooth', block: 'center' });
       });
