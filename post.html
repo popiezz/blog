@@ -23,12 +23,15 @@
 </nav>
 
 <div class="pz-hero container">
+  <a class="pz-back" href="index.html">&larr; Back to journal</a>
   <div class="pz-eyebrow" id="pz-post-tags"></div>
   <h1 class="pz-h1" id="pz-post-title">Loading…</h1>
   <div class="pz-post-date" id="pz-post-date"></div>
 </div>
 
 <div class="pz-post container" id="pz-post-body"></div>
+
+<div class="pz-progress" id="pz-progress" aria-hidden="true"></div>
 
 <div class="pz-footer container">
   <span class="pz-count">© 2026 Popiezz</span>
@@ -59,10 +62,45 @@
     dateEl.textContent = pzFormatDate(post.date, true);
     tagsEl.textContent = post.tags.map(function (t) { return t.label; }).join(' · ') || 'Journal';
     bodyEl.innerHTML = pzMarkdownToHtml(post.body);
+    pzInitProgressRail();
   } catch (e) {
     titleEl.textContent = 'Post not found';
     bodyEl.innerHTML = '<p>This entry doesn’t exist or couldn’t be loaded.</p>';
     console.error(e);
+  }
+
+  function pzInitProgressRail() {
+    var rail = document.getElementById('pz-progress');
+    var paras = bodyEl.querySelectorAll('p');
+    if (paras.length < 2) return;
+
+    var ticks = [];
+    paras.forEach(function () {
+      var tick = document.createElement('div');
+      tick.className = 'pz-progress-tick';
+      rail.appendChild(tick);
+      ticks.push(tick);
+    });
+    rail.classList.add('is-visible');
+
+    var ticking = false;
+    function update() {
+      ticking = false;
+      var center = window.innerHeight / 2;
+      var closest = 0, closestDist = Infinity;
+      paras.forEach(function (p, i) {
+        var rect = p.getBoundingClientRect();
+        var dist = Math.abs((rect.top + rect.height / 2) - center);
+        if (dist < closestDist) { closestDist = dist; closest = i; }
+      });
+      ticks.forEach(function (t, i) { t.classList.toggle('active', i === closest); });
+    }
+    function onScroll() {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    update();
   }
 })();
 </script>
