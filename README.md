@@ -1,4 +1,4 @@
-# Popiezz Blog
+# Filip's Blog
 
 A small static journal. Home page lists entries with a category sidebar; About is a short bio page. No build step — the site reads posts straight from this repo at request time.
 

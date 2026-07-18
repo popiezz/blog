@@ -1,129 +1,149 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Popiezz</title>
-<link rel="stylesheet" href="styles.css">
-</head>
-<body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FCP</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="pz-nav container">
+      <div class="pz-logo">FCP</div>
+      <div class="pz-nav-right">
+        <div class="pz-navlinks">
+          <a class="pz-navlink" href="index.html">Home</a>
+          <a class="pz-navlink" href="about.html">About</a>
+        </div>
+        <div class="pz-toggle-track">
+          <button class="pz-toggle-opt" data-theme="light">Light</button>
+          <button class="pz-toggle-opt" data-theme="dark">Dark</button>
+        </div>
+      </div>
+    </nav>
 
-<nav class="pz-nav container">
-  <div class="pz-logo">POPIEZZ</div>
-  <div class="pz-nav-right">
-    <div class="pz-navlinks">
-      <a class="pz-navlink" href="index.html">Home</a>
-      <a class="pz-navlink" href="about.html">About</a>
+    <div class="pz-hero container">
+      <a class="pz-back" href="index.html">&larr; Back to journal</a>
+      <div class="pz-eyebrow" id="pz-post-tags"></div>
+      <h1 class="pz-h1" id="pz-post-title">Loading…</h1>
+      <div class="pz-post-date" id="pz-post-date"></div>
     </div>
-    <div class="pz-toggle-track">
-      <button class="pz-toggle-opt" data-theme="light">Light</button>
-      <button class="pz-toggle-opt" data-theme="dark">Dark</button>
+
+    <div class="pz-post container" id="pz-post-body"></div>
+
+    <div class="pz-progress" id="pz-progress" aria-hidden="true"></div>
+
+    <div class="pz-footer container">
+      <span class="pz-count">© 2026 Filip Popescu</span>
+      <span class="pz-count">built by hand, published from markdown</span>
     </div>
-  </div>
-</nav>
 
-<div class="pz-hero container">
-  <a class="pz-back" href="index.html">&larr; Back to journal</a>
-  <div class="pz-eyebrow" id="pz-post-tags"></div>
-  <h1 class="pz-h1" id="pz-post-title">Loading…</h1>
-  <div class="pz-post-date" id="pz-post-date"></div>
-</div>
+    <script src="posts.js"></script>
+    <script src="theme.js"></script>
+    <script>
+      (async function () {
+        var params = new URLSearchParams(location.search);
+        var slug = params.get("slug");
+        var titleEl = document.getElementById("pz-post-title");
+        var dateEl = document.getElementById("pz-post-date");
+        var tagsEl = document.getElementById("pz-post-tags");
+        var bodyEl = document.getElementById("pz-post-body");
 
-<div class="pz-post container" id="pz-post-body"></div>
+        if (!slug) {
+          titleEl.textContent = "Post not found";
+          bodyEl.innerHTML = "<p>No post was specified.</p>";
+          return;
+        }
 
-<div class="pz-progress" id="pz-progress" aria-hidden="true"></div>
+        try {
+          var post = await pzFetchPost(slug);
+          document.title = post.title + " — FCP";
+          titleEl.textContent = post.title;
+          dateEl.textContent = pzFormatDate(post.date, true);
+          tagsEl.textContent =
+            post.tags
+              .map(function (t) {
+                return t.label;
+              })
+              .join(" · ") || "Journal";
+          bodyEl.innerHTML = pzMarkdownToHtml(post.body);
+          pzInitProgressRail();
+        } catch (e) {
+          titleEl.textContent = "Post not found";
+          bodyEl.innerHTML =
+            "<p>This entry doesn’t exist or couldn’t be loaded.</p>";
+          console.error(e);
+        }
 
-<div class="pz-footer container">
-  <span class="pz-count">© 2026 Popiezz</span>
-  <span class="pz-count">built by hand, published from markdown</span>
-</div>
+        function pzInitProgressRail() {
+          var rail = document.getElementById("pz-progress");
+          var paras = bodyEl.querySelectorAll("p");
+          if (paras.length < 2) return;
 
-<script src="posts.js"></script>
-<script src="theme.js"></script>
-<script>
-(async function () {
-  var params = new URLSearchParams(location.search);
-  var slug = params.get('slug');
-  var titleEl = document.getElementById('pz-post-title');
-  var dateEl = document.getElementById('pz-post-date');
-  var tagsEl = document.getElementById('pz-post-tags');
-  var bodyEl = document.getElementById('pz-post-body');
+          var ticks = [];
+          paras.forEach(function (p, i) {
+            var tick = document.createElement("button");
+            tick.type = "button";
+            tick.className = "pz-progress-tick";
 
-  if (!slug) {
-    titleEl.textContent = 'Post not found';
-    bodyEl.innerHTML = '<p>No post was specified.</p>';
-    return;
-  }
+            var bar = document.createElement("span");
+            bar.className = "pz-progress-tick-bar";
+            tick.appendChild(bar);
 
-  try {
-    var post = await pzFetchPost(slug);
-    document.title = post.title + ' — Popiezz';
-    titleEl.textContent = post.title;
-    dateEl.textContent = pzFormatDate(post.date, true);
-    tagsEl.textContent = post.tags.map(function (t) { return t.label; }).join(' · ') || 'Journal';
-    bodyEl.innerHTML = pzMarkdownToHtml(post.body);
-    pzInitProgressRail();
-  } catch (e) {
-    titleEl.textContent = 'Post not found';
-    bodyEl.innerHTML = '<p>This entry doesn’t exist or couldn’t be loaded.</p>';
-    console.error(e);
-  }
+            var prev = p.previousElementSibling;
+            var sectionTitle =
+              prev && /^H[1-6]$/.test(prev.tagName) ? prev.textContent : null;
+            if (sectionTitle) {
+              tick.classList.add("is-section");
+              var label = document.createElement("span");
+              label.className = "pz-progress-section-label";
+              label.textContent = sectionTitle;
+              tick.appendChild(label);
+            }
+            tick.setAttribute(
+              "aria-label",
+              sectionTitle
+                ? 'Jump to "' + sectionTitle + '"'
+                : "Jump to paragraph " + (i + 1),
+            );
 
-  function pzInitProgressRail() {
-    var rail = document.getElementById('pz-progress');
-    var paras = bodyEl.querySelectorAll('p');
-    if (paras.length < 2) return;
+            tick.addEventListener("click", function () {
+              p.scrollIntoView({ behavior: "smooth", block: "center" });
+            });
+            rail.appendChild(tick);
+            ticks.push(tick);
+          });
+          rail.removeAttribute("aria-hidden");
+          rail.classList.add("is-visible");
 
-    var ticks = [];
-    paras.forEach(function (p, i) {
-      var tick = document.createElement('button');
-      tick.type = 'button';
-      tick.className = 'pz-progress-tick';
-
-      var bar = document.createElement('span');
-      bar.className = 'pz-progress-tick-bar';
-      tick.appendChild(bar);
-
-      var prev = p.previousElementSibling;
-      var sectionTitle = prev && /^H[1-6]$/.test(prev.tagName) ? prev.textContent : null;
-      if (sectionTitle) {
-        tick.classList.add('is-section');
-        var label = document.createElement('span');
-        label.className = 'pz-progress-section-label';
-        label.textContent = sectionTitle;
-        tick.appendChild(label);
-      }
-      tick.setAttribute('aria-label', sectionTitle ? 'Jump to "' + sectionTitle + '"' : 'Jump to paragraph ' + (i + 1));
-
-      tick.addEventListener('click', function () {
-        p.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      });
-      rail.appendChild(tick);
-      ticks.push(tick);
-    });
-    rail.removeAttribute('aria-hidden');
-    rail.classList.add('is-visible');
-
-    var ticking = false;
-    function update() {
-      ticking = false;
-      var center = window.innerHeight / 2;
-      var closest = 0, closestDist = Infinity;
-      paras.forEach(function (p, i) {
-        var rect = p.getBoundingClientRect();
-        var dist = Math.abs((rect.top + rect.height / 2) - center);
-        if (dist < closestDist) { closestDist = dist; closest = i; }
-      });
-      ticks.forEach(function (t, i) { t.classList.toggle('active', i === closest); });
-    }
-    function onScroll() {
-      if (!ticking) { ticking = true; requestAnimationFrame(update); }
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    update();
-  }
-})();
-</script>
-</body>
+          var ticking = false;
+          function update() {
+            ticking = false;
+            var center = window.innerHeight / 2;
+            var closest = 0,
+              closestDist = Infinity;
+            paras.forEach(function (p, i) {
+              var rect = p.getBoundingClientRect();
+              var dist = Math.abs(rect.top + rect.height / 2 - center);
+              if (dist < closestDist) {
+                closestDist = dist;
+                closest = i;
+              }
+            });
+            ticks.forEach(function (t, i) {
+              t.classList.toggle("active", i === closest);
+            });
+          }
+          function onScroll() {
+            if (!ticking) {
+              ticking = true;
+              requestAnimationFrame(update);
+            }
+          }
+          window.addEventListener("scroll", onScroll, { passive: true });
+          window.addEventListener("resize", onScroll);
+          update();
+        }
+      })();
+    </script>
+  </body>
 </html>
