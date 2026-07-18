@@ -45,9 +45,15 @@ function pzTagClass(tag) {
 
 var PZ_MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
+function pzNormalizeDateStr(dateStr) {
+  var m = /^(\d{1,4})-(\d{1,2})-(\d{1,2})$/.exec(String(dateStr).trim());
+  if (!m) return dateStr;
+  return m[1].padStart(4, '0') + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0');
+}
+
 function pzFormatDate(dateStr, withYear) {
   if (!dateStr) return '';
-  var d = new Date(dateStr + 'T00:00:00Z');
+  var d = new Date(pzNormalizeDateStr(dateStr) + 'T00:00:00Z');
   if (isNaN(d.getTime())) return dateStr;
   var m = PZ_MONTHS[d.getUTCMonth()];
   var day = String(d.getUTCDate()).padStart(2, '0');
@@ -152,27 +158,41 @@ function pzPostFromRaw(slug, raw) {
   };
 }
 
+function pzDateValue(dateStr) {
+  if (!dateStr) return -Infinity;
+  var t = new Date(pzNormalizeDateStr(dateStr) + 'T00:00:00Z').getTime();
+  return isNaN(t) ? -Infinity : t;
+}
+
+function pzBustCache(url) {
+  return url + (url.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now();
+}
+
+function pzFetchFresh(url) {
+  return fetch(pzBustCache(url), { cache: 'no-store' });
+}
+
 async function pzFetchPosts() {
   var listUrl = 'https://api.github.com/repos/' + PZ_REPO.owner + '/' + PZ_REPO.repo + '/contents/posts?ref=' + PZ_REPO.branch;
-  var listRes = await fetch(listUrl, { headers: { Accept: 'application/vnd.github.v3+json' } });
+  var listRes = await pzFetchFresh(listUrl);
   if (listRes.status === 404) return [];
   if (!listRes.ok) throw new Error('Could not list posts (' + listRes.status + ')');
   var entries = await listRes.json();
   var files = entries.filter(function (f) { return f.type === 'file' && /\.md$/i.test(f.name); });
 
   var posts = await Promise.all(files.map(async function (f) {
-    var res = await fetch(f.download_url);
+    var res = await pzFetchFresh(f.download_url);
     var raw = await res.text();
     return pzPostFromRaw(pzSlugFromFilename(f.name), raw);
   }));
 
-  posts.sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+  posts.sort(function (a, b) { return pzDateValue(b.date) - pzDateValue(a.date); });
   return posts;
 }
 
 async function pzFetchPost(slug) {
   var url = 'https://raw.githubusercontent.com/' + PZ_REPO.owner + '/' + PZ_REPO.repo + '/' + PZ_REPO.branch + '/posts/' + encodeURIComponent(slug) + '.md';
-  var res = await fetch(url);
+  var res = await pzFetchFresh(url);
   if (!res.ok) throw new Error('Post not found');
   var raw = await res.text();
   return pzPostFromRaw(slug, raw);

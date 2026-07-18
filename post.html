@@ -75,12 +75,19 @@
     if (paras.length < 2) return;
 
     var ticks = [];
-    paras.forEach(function () {
-      var tick = document.createElement('div');
+    paras.forEach(function (p, i) {
+      var tick = document.createElement('button');
+      tick.type = 'button';
       tick.className = 'pz-progress-tick';
+      tick.setAttribute('aria-label', 'Jump to paragraph ' + (i + 1));
+      tick.innerHTML = '<span class="pz-progress-tick-bar"></span>';
+      tick.addEventListener('click', function () {
+        p.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
       rail.appendChild(tick);
       ticks.push(tick);
     });
+    rail.removeAttribute('aria-hidden');
     rail.classList.add('is-visible');
 
     var ticking = false;

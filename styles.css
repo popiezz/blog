@@ -158,19 +158,35 @@ a { text-decoration: none; }
 .pz-progress.is-visible { display: flex; }
 
 .pz-progress-tick {
+  border: none;
+  background: none;
+  padding: 7px 4px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  cursor: pointer;
+}
+
+.pz-progress-tick-bar {
   width: 12px;
   height: 2px;
   border-radius: 2px;
   background: oklch(0.82 0.02 70);
   transition: width 0.2s ease, background 0.2s ease;
 }
-[data-theme="dark"] .pz-progress-tick { background: oklch(0.32 0.03 220) !important; }
+[data-theme="dark"] .pz-progress-tick-bar { background: oklch(0.32 0.03 220) !important; }
 
-.pz-progress-tick.active {
+.pz-progress-tick:hover .pz-progress-tick-bar {
+  background: oklch(0.6 0.08 50);
+}
+[data-theme="dark"] .pz-progress-tick:hover .pz-progress-tick-bar { background: oklch(0.55 0.08 80) !important; }
+
+.pz-progress-tick.active .pz-progress-tick-bar {
   width: 22px;
   background: oklch(0.5 0.12 30);
 }
-[data-theme="dark"] .pz-progress-tick.active { background: oklch(0.72 0.13 55) !important; }
+[data-theme="dark"] .pz-progress-tick.active .pz-progress-tick-bar { background: oklch(0.72 0.13 55) !important; }
 
 @media (max-width: 1180px) {
   .pz-progress.is-visible { display: none; }
