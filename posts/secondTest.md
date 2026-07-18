@@ -1,7 +1,7 @@
 ---
 title: Second test
 tags: [testing, pc]
-date: 19-07-2026
+date: 2026-07-19
 image: false
 ---
 
