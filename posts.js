@@ -5,7 +5,8 @@ function pzSlugFromFilename(name) {
 }
 
 function pzParseFrontmatter(raw) {
-  var match = /^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/.exec(raw);
+  var trimmed = raw.replace(/^﻿/, '').replace(/^\s+/, '');
+  var match = /^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/.exec(trimmed);
   if (!match) return { meta: {}, body: raw };
   var meta = {};
   match[1].split('\n').forEach(function (line) {
@@ -30,8 +31,9 @@ function pzParseFrontmatter(raw) {
 }
 
 function pzTags(meta) {
-  if (Array.isArray(meta.tags)) return meta.tags;
-  if (typeof meta.tags === 'string') return meta.tags.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+  var raw = meta.tags != null ? meta.tags : meta.tag;
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === 'string') return raw.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
   return [];
 }
 

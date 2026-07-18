@@ -131,6 +131,51 @@ a { text-decoration: none; }
 }
 [data-theme="dark"] .pz-h1 { color: oklch(0.94 0.015 90) !important; }
 
+.pz-back {
+  display: inline-block;
+  color: oklch(0.45 0.02 50);
+  font: 500 12px 'IBM Plex Mono', monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+.pz-back:hover { text-decoration: underline; }
+[data-theme="dark"] .pz-back { color: oklch(0.72 0.02 150) !important; }
+
+.pz-progress {
+  position: fixed;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 7px;
+  z-index: 10;
+}
+.pz-progress.is-visible { display: flex; }
+
+.pz-progress-tick {
+  width: 12px;
+  height: 2px;
+  border-radius: 2px;
+  background: oklch(0.82 0.02 70);
+  transition: width 0.2s ease, background 0.2s ease;
+}
+[data-theme="dark"] .pz-progress-tick { background: oklch(0.32 0.03 220) !important; }
+
+.pz-progress-tick.active {
+  width: 22px;
+  background: oklch(0.5 0.12 30);
+}
+[data-theme="dark"] .pz-progress-tick.active { background: oklch(0.72 0.13 55) !important; }
+
+@media (max-width: 1180px) {
+  .pz-progress.is-visible { display: none; }
+}
+
 .pz-post-date {
   color: oklch(0.4 0.08 40);
   font: 600 12px 'IBM Plex Mono', monospace;

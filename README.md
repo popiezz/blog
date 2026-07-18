@@ -10,7 +10,7 @@ Add a markdown file to `posts/`, named after the post's slug, e.g.:
 posts/on-writing-things-down.md
 ```
 
-Start it with frontmatter, then the post body in markdown:
+The frontmatter block must be the very first thing in the file — nothing before the opening `---`, not even a heading — followed by the post body in markdown:
 
 ```markdown
 ---
