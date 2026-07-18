@@ -1,132 +1,174 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Popiezz — Words, mostly true</title>
-<link rel="stylesheet" href="styles.css">
-</head>
-<body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Popiezz — Words, mostly true</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="pz-nav container">
+      <div class="pz-logo">POPIEZZ</div>
+      <div class="pz-nav-right">
+        <div class="pz-navlinks">
+          <a class="pz-navlink pz-navlink-active" href="index.html">Home</a>
+          <a class="pz-navlink" href="about.html">About</a>
+        </div>
+        <div class="pz-toggle-track">
+          <button class="pz-toggle-opt" data-theme="light">Light</button>
+          <button class="pz-toggle-opt" data-theme="dark">Dark</button>
+        </div>
+      </div>
+    </nav>
 
-<nav class="pz-nav container">
-  <div class="pz-logo">POPIEZZ</div>
-  <div class="pz-nav-right">
-    <div class="pz-navlinks">
-      <a class="pz-navlink pz-navlink-active" href="index.html">Home</a>
-      <a class="pz-navlink" href="about.html">About</a>
+    <div class="pz-hero container">
+      <div class="pz-eyebrow">First part</div>
+      <h1 class="pz-h1">Second part</h1>
     </div>
-    <div class="pz-toggle-track">
-      <button class="pz-toggle-opt" data-theme="light">Light</button>
-      <button class="pz-toggle-opt" data-theme="dark">Dark</button>
+
+    <div class="pz-journal-wrap container">
+      <div class="pz-sidebar pz-sidebar-border">
+        <span class="pz-sidebar-label">Categories</span>
+        <div class="pz-cat-list" id="pz-cat-mount"></div>
+      </div>
+
+      <div class="pz-journal-main">
+        <div class="pz-section-header">
+          <span class="pz-section-label">Journal</span>
+          <span class="pz-count" id="pz-count"></span>
+        </div>
+        <div id="pz-journal-mount"></div>
+      </div>
     </div>
-  </div>
-</nav>
 
-<div class="pz-hero container">
-  <div class="pz-eyebrow">Words, mostly true</div>
-  <h1 class="pz-h1">Notes on work, attention, and the slow way of doing things.</h1>
-</div>
-
-<div class="pz-journal-wrap container">
-  <div class="pz-sidebar pz-sidebar-border">
-    <span class="pz-sidebar-label">Categories</span>
-    <div class="pz-cat-list" id="pz-cat-mount"></div>
-  </div>
-
-  <div class="pz-journal-main">
-    <div class="pz-section-header">
-      <span class="pz-section-label">Journal</span>
-      <span class="pz-count" id="pz-count"></span>
+    <div class="pz-footer container">
+      <span class="pz-count">© 2026 Popiezz</span>
+      <span class="pz-count">footer stuff</span>
     </div>
-    <div id="pz-journal-mount"></div>
-  </div>
-</div>
 
-<div class="pz-footer container">
-  <span class="pz-count">© 2026 Popiezz</span>
-  <span class="pz-count">built by hand, published from markdown</span>
-</div>
+    <script src="posts.js"></script>
+    <script src="theme.js"></script>
+    <script>
+      (async function () {
+        var state = { category: "All", posts: [] };
+        var catMount = document.getElementById("pz-cat-mount");
+        var journalMount = document.getElementById("pz-journal-mount");
+        var countEl = document.getElementById("pz-count");
 
-<script src="posts.js"></script>
-<script src="theme.js"></script>
-<script>
-(async function () {
-  var state = { category: 'All', posts: [] };
-  var catMount = document.getElementById('pz-cat-mount');
-  var journalMount = document.getElementById('pz-journal-mount');
-  var countEl = document.getElementById('pz-count');
+        function render() {
+          var posts = state.posts;
+          var counts = {};
+          posts.forEach(function (p) {
+            p.tags.forEach(function (t) {
+              counts[t.label] = (counts[t.label] || 0) + 1;
+            });
+          });
+          var labels = Object.keys(counts).sort();
+          var categories = [{ label: "All", count: posts.length }].concat(
+            labels.map(function (l) {
+              return { label: l, count: counts[l] };
+            }),
+          );
 
-  function render() {
-    var posts = state.posts;
-    var counts = {};
-    posts.forEach(function (p) {
-      p.tags.forEach(function (t) { counts[t.label] = (counts[t.label] || 0) + 1; });
-    });
-    var labels = Object.keys(counts).sort();
-    var categories = [{ label: 'All', count: posts.length }].concat(
-      labels.map(function (l) { return { label: l, count: counts[l] }; })
-    );
+          catMount.innerHTML = categories
+            .map(function (c) {
+              return (
+                '<span class="pz-cat ' +
+                (state.category === c.label ? "pz-cat-active" : "") +
+                '" data-cat="' +
+                c.label +
+                '">' +
+                "<span>" +
+                c.label +
+                '</span><span style="opacity:0.6">' +
+                c.count +
+                "</span>" +
+                "</span>"
+              );
+            })
+            .join("");
+          catMount.querySelectorAll(".pz-cat").forEach(function (el) {
+            el.addEventListener("click", function () {
+              state.category = el.dataset.cat;
+              render();
+            });
+          });
 
-    catMount.innerHTML = categories.map(function (c) {
-      return '<span class="pz-cat ' + (state.category === c.label ? 'pz-cat-active' : '') + '" data-cat="' + c.label + '">' +
-        '<span>' + c.label + '</span><span style="opacity:0.6">' + c.count + '</span>' +
-      '</span>';
-    }).join('');
-    catMount.querySelectorAll('.pz-cat').forEach(function (el) {
-      el.addEventListener('click', function () {
-        state.category = el.dataset.cat;
+          var filtered =
+            state.category === "All"
+              ? posts
+              : posts.filter(function (p) {
+                  return p.tags.some(function (t) {
+                    return t.label === state.category;
+                  });
+                });
+          countEl.textContent =
+            filtered.length + (filtered.length === 1 ? " entry" : " entries");
+
+          if (!posts.length) {
+            journalMount.innerHTML =
+              '<p class="pz-excerpt">No entries yet — add a markdown file to <code>posts/</code> and push to publish.</p>';
+            return;
+          }
+          if (!filtered.length) {
+            journalMount.innerHTML =
+              '<p class="pz-excerpt">No entries in this category.</p>';
+            return;
+          }
+
+          journalMount.innerHTML = filtered
+            .map(function (art) {
+              var tags = art.tags
+                .map(function (t) {
+                  return (
+                    '<span class="pz-tag ' + t.cls + '">' + t.label + "</span>"
+                  );
+                })
+                .join("");
+              var photo = art.hasImage
+                ? '<div class="pz-photo"><span class="pz-photo-label">photo</span></div>'
+                : "";
+              return (
+                '<div class="pz-row">' +
+                '<div class="pz-row-date-col">' +
+                '<span class="pz-date">' +
+                pzFormatDate(art.date) +
+                "</span>" +
+                '<div class="pz-dot-line"><div class="pz-dot"></div><div class="pz-line"></div></div>' +
+                "</div>" +
+                '<div class="pz-row-body">' +
+                '<a href="post.html?slug=' +
+                encodeURIComponent(art.slug) +
+                '">' +
+                '<h3 class="pz-title">' +
+                art.title +
+                "</h3>" +
+                "</a>" +
+                '<p class="pz-excerpt">' +
+                art.excerpt +
+                "</p>" +
+                '<div class="pz-tags">' +
+                tags +
+                "</div>" +
+                "</div>" +
+                photo +
+                "</div>"
+              );
+            })
+            .join("");
+        }
+
+        try {
+          state.posts = await pzFetchPosts();
+        } catch (e) {
+          journalMount.innerHTML =
+            '<p class="pz-excerpt">Couldn’t load posts right now (' +
+            e.message +
+            ").</p>";
+          console.error(e);
+        }
         render();
-      });
-    });
-
-    var filtered = state.category === 'All' ? posts : posts.filter(function (p) {
-      return p.tags.some(function (t) { return t.label === state.category; });
-    });
-    countEl.textContent = filtered.length + (filtered.length === 1 ? ' entry' : ' entries');
-
-    if (!posts.length) {
-      journalMount.innerHTML = '<p class="pz-excerpt">No entries yet — add a markdown file to <code>posts/</code> and push to publish.</p>';
-      return;
-    }
-    if (!filtered.length) {
-      journalMount.innerHTML = '<p class="pz-excerpt">No entries in this category.</p>';
-      return;
-    }
-
-    journalMount.innerHTML = filtered.map(function (art) {
-      var tags = art.tags.map(function (t) {
-        return '<span class="pz-tag ' + t.cls + '">' + t.label + '</span>';
-      }).join('');
-      var photo = art.hasImage
-        ? '<div class="pz-photo"><span class="pz-photo-label">photo</span></div>'
-        : '';
-      return (
-        '<div class="pz-row">' +
-          '<div class="pz-row-date-col">' +
-            '<span class="pz-date">' + pzFormatDate(art.date) + '</span>' +
-            '<div class="pz-dot-line"><div class="pz-dot"></div><div class="pz-line"></div></div>' +
-          '</div>' +
-          '<div class="pz-row-body">' +
-            '<a href="post.html?slug=' + encodeURIComponent(art.slug) + '">' +
-              '<h3 class="pz-title">' + art.title + '</h3>' +
-            '</a>' +
-            '<p class="pz-excerpt">' + art.excerpt + '</p>' +
-            '<div class="pz-tags">' + tags + '</div>' +
-          '</div>' +
-          photo +
-        '</div>'
-      );
-    }).join('');
-  }
-
-  try {
-    state.posts = await pzFetchPosts();
-  } catch (e) {
-    journalMount.innerHTML = '<p class="pz-excerpt">Couldn’t load posts right now (' + e.message + ').</p>';
-    console.error(e);
-  }
-  render();
-})();
-</script>
-</body>
+      })();
+    </script>
+  </body>
 </html>
